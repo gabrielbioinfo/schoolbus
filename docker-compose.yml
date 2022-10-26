@@ -2,33 +2,41 @@ version: '3'
 
 services:
   postgres:
-      image: postgres
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
-      environment:
-        POSTGRES_DB: schoolbus-auth
-        POSTGRES_USER: authdb
-        POSTGRES_PASSWORD: authdb
-      ports:
-        - 5432:5432
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: schoolbus-auth
+      POSTGRES_USER: authdb
+      POSTGRES_PASSWORD: authdb
+    ports:
+      - 5432:5432
   keycloak:
-      image: bitnami/keycloak:latest
-      environment:
-        KEYCLOAK_DATABASE_HOST: postgres
-        KEYCLOAK_DATABASE_PORT: 5432
-        KEYCLOAK_DATABASE_NAME: schoolbus-auth
-        KEYCLOAK_DATABASE_SCHEMA: public
-        KEYCLOAK_DATABASE_USER: authdb
-        KEYCLOAK_DATABASE_PASSWORD: authdb
-        KEYCLOAK_ADMIN_USER: admin
-        KEYCLOAK_ADMIN_PASSWORD: admin
-        KEYCLOAK_MANAGEMENT_PASSWORD: admin
-        #KEYCLOAK_JDBC_PARAMS: "sslmode=verify-full&connectTimeout=30000"
-      ports:
-        - 8086:8080
-      depends_on:
-        - postgres
+    image: bitnami/keycloak:latest
+    environment:
+      KEYCLOAK_DATABASE_HOST: postgres
+      KEYCLOAK_DATABASE_PORT: 5432
+      KEYCLOAK_DATABASE_NAME: schoolbus-auth
+      KEYCLOAK_DATABASE_SCHEMA: public
+      KEYCLOAK_DATABASE_USER: authdb
+      KEYCLOAK_DATABASE_PASSWORD: authdb
+      KEYCLOAK_ADMIN_USER: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_MANAGEMENT_PASSWORD: admin
+      #KEYCLOAK_JDBC_PARAMS: "sslmode=verify-full&connectTimeout=30000"
+    ports:
+      - 8086:8080
+    depends_on:
+      - postgres
 
+  app-auth:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - keycloak
 volumes:
   postgres_data:
       driver: local
